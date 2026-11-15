@@ -1,10 +1,25 @@
 import { expect, test } from '@playwright/test'
 
-test('home page renders and a case study route works', async ({ page }) => {
+test('home: the splash lifts and the hero is there', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-  await page.getByRole('link', { name: /case study/i }).click()
-  await expect(page).toHaveURL(/\/work\/hsc-it$/)
+  await expect(page.getByRole('status')).toBeHidden({ timeout: 15_000 })
+  await expect(page.getByRole('heading', { level: 1 })).toBeAttached()
+  await expect(page.getByRole('link', { name: /start a project/i }).first()).toBeVisible()
+})
+
+test('home: scrolling reaches the ending', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('status')).toBeHidden({ timeout: 15_000 })
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(page.getByRole('link', { name: /forge my idea/i })).toBeVisible()
+  // the page never scrolls sideways
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  )
+})
+
+test('a case study route works', async ({ page }) => {
+  await page.goto('/work/hsc-it')
   await expect(page.getByRole('heading', { level: 1, name: 'HSC-iT' })).toBeVisible()
 })
 

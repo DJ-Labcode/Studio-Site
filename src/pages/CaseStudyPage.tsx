@@ -8,7 +8,7 @@ export default function CaseStudyPage() {
   const p = projectBySlug(slug)
   if (!p) return <NotFoundPage />
   return (
-    <article className="mx-auto grid max-w-3xl gap-6 px-5 py-24">
+    <article className="mx-auto grid max-w-3xl gap-6 px-5 pt-36 pb-24">
       <p className="font-mono text-xs tracking-widest uppercase" style={{ color: p.hue }}>
         {p.kind}
       </p>
