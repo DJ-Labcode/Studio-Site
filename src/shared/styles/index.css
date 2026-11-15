@@ -5,15 +5,15 @@
  * Change a value here and the whole site follows.
  */
 @theme {
-  --color-paper: #0a0a0d;
-  --color-surface: #121217;
-  --color-line: #24242c;
-  --color-ink: #f2f0ea;
-  --color-muted: #8f8c99;
+  --color-paper: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-line: #e6e0d6;
+  --color-ink: #16151c;
+  --color-muted: #625f6e;
   --color-ember: #ff5a1f;
   --color-ember-deep: #e0440c;
   --color-spark: #ffb020;
-  --color-web: #5b6bff;
+  --color-web: #1e2bff;
   --color-app: #ff5a1f;
   /* fixed brand blue of the laptop screen in the Blender version */
   --color-screen: #1e2bff;

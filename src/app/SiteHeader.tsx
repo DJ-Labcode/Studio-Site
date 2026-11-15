@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { brand } from '@/shared/brand'
 import { cn } from '@/shared/lib/cn'
 import { ButtonLink } from '@/shared/ui/Button'
-import { Logo } from '@/shared/ui/Logo'
+import { Wordmark } from '@/shared/ui/Wordmark'
 
 const NAV = [
   ['What we do', '/#what'],
@@ -29,7 +29,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5">
         <Link to="/" aria-label={`${brand.name} home`}>
-          <Logo />
+          <Wordmark anchor />
         </Link>
         <nav aria-label="Main" className="flex items-center gap-6 text-sm">
           {NAV.map(([label, to]) => (
