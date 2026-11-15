@@ -7,3 +7,5 @@ The exploration prototype of the studio site, kept for reference. The clean rebu
 - `blender/` the Blender (Cycles) render pipeline and the three rendered clips in `blender/clips`
 - `brand/` the logo kit (SVG, PNG, brand sheet)
 - `video/record.js` the script that records the HD walkthrough video
+
+Note: the shell scripts and `build.py` contain absolute paths from the session they were written in; adjust them before re-running.
