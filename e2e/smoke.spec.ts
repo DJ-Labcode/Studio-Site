@@ -28,3 +28,11 @@ test('unknown routes show the 404 page', async ({ page }) => {
   await page.goto('/nope')
   await expect(page.getByText('404')).toBeVisible()
 })
+
+test('the splash plays on the home page and hands over to the header logo', async ({ page }) => {
+  await page.goto('/')
+  const splash = page.getByRole('status', { name: /loading/i })
+  await expect(splash).toBeVisible()
+  await expect(splash).toBeHidden({ timeout: 10_000 })
+  await expect(page.getByRole('link', { name: /duoforge home/i })).toBeVisible()
+})
