@@ -11,18 +11,16 @@ export type Project = {
   stack: string[]
   /** accent colour for this project */
   hue: string
-  /** looping footage in /public/work; replace the files with real screen recordings when available */
-  video: string
-  poster: string
   device: 'phone' | 'browser'
-  /** the footage is an illustration, not a recording of the real product */
-  illustrative: boolean
+  /** real screenshots in /public/work/<slug>/, shown inside the device frame; empty until they are added */
+  shots: string[]
   link?: { label: string; href: string }
   status?: string
 }
 
 /**
  * Only projects named in the founders' own profiles appear here.
+ * To add screenshots: put the images in public/work/<slug>/ and list their paths in `shots`.
  * Adding one is all it takes to list it and give it a /work/:slug page.
  */
 export const projects: Project[] = [
@@ -35,10 +33,8 @@ export const projects: Project[] = [
     highlights: ['Responsive website built with HTML, CSS and JavaScript'],
     stack: ['HTML', 'CSS', 'JavaScript'],
     hue: '#1F9D6B',
-    video: '/work/mind-of-finance.mp4',
-    poster: '/work/mind-of-finance.jpg',
     device: 'browser',
-    illustrative: true,
+    shots: [],
   },
   {
     slug: 'opticalearn',
@@ -52,10 +48,8 @@ export const projects: Project[] = [
     ],
     stack: ['HTML', 'CSS', 'JavaScript'],
     hue: '#14B8A6',
-    video: '/work/opticalearn.mp4',
-    poster: '/work/opticalearn.jpg',
     device: 'browser',
-    illustrative: true,
+    shots: [],
   },
   {
     slug: 'hsc-it',
@@ -70,10 +64,8 @@ export const projects: Project[] = [
     ],
     stack: ['Flutter', 'Provider', 'Firebase', 'In-app purchases'],
     hue: '#3D7BFF',
-    video: '/work/hsc-it.mp4',
-    poster: '/work/hsc-it.jpg',
     device: 'phone',
-    illustrative: true,
+    shots: [],
     link: {
       label: 'Google Play',
       href: 'https://play.google.com/store/apps/details?id=in.hscit.hscittesting',
@@ -94,10 +86,8 @@ export const projects: Project[] = [
     ],
     stack: ['Flutter', 'BLoC', 'FastAPI', 'PostgreSQL + pgvector', 'LangGraph', 'Docker'],
     hue: '#2FBF71',
-    video: '/work/raglabs.mp4',
-    poster: '/work/raglabs.jpg',
     device: 'phone',
-    illustrative: true,
+    shots: [],
     status: 'In progress',
   },
   {
@@ -113,10 +103,8 @@ export const projects: Project[] = [
     ],
     stack: ['Flutter', 'FastAPI', 'AWS S3', 'Redis', 'Docker', 'PostgreSQL'],
     hue: '#FF4D6D',
-    video: '/work/video-streaming.mp4',
-    poster: '/work/video-streaming.jpg',
     device: 'phone',
-    illustrative: true,
+    shots: [],
   },
 ]
 

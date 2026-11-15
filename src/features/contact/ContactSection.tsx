@@ -7,8 +7,9 @@ import { isConfigured, sendBrief } from './sendBrief'
 const NEEDS = ['Website', 'Mobile app', 'Both', 'Not sure yet'] as const
 type State = 'idle' | 'sending' | 'sent' | 'error'
 
+const label = 'grid gap-2 font-mono text-[0.7rem] tracking-widest text-muted uppercase'
 const field =
-  'w-full rounded-md border border-white/20 bg-white/5 px-4 py-3.5 text-paper placeholder:text-paper/40 focus:border-ember focus:outline-none'
+  'w-full rounded-md border border-line bg-surface px-4 py-3.5 font-sans text-base tracking-normal text-ink normal-case placeholder:text-muted/60 focus:border-ember focus:outline-none'
 
 /** The last page: one short form, plus direct addresses for people who prefer email. */
 export function ContactSection() {
@@ -41,25 +42,25 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="bg-ink text-paper relative px-5 py-28">
+    <section id="contact" className="border-line relative border-t px-5 py-28">
       <div className="mx-auto grid max-w-6xl gap-14 md:grid-cols-2">
         <div className="grid content-start gap-6">
-          <p className="text-ember font-mono text-xs tracking-[0.2em] uppercase">Contact</p>
-          <h2 className="text-[clamp(3rem,8vw,7rem)] leading-[0.92] uppercase">
+          <p className="text-ember font-mono text-[0.7rem] tracking-[0.18em] uppercase">Contact</p>
+          <h2 className="text-[clamp(2.4rem,6vw,5.4rem)] leading-none font-medium uppercase">
             Let’s forge <span className="text-ember">yours.</span>
           </h2>
-          <p className="text-paper/70 max-w-md text-lg">
+          <p className="text-muted max-w-md text-lg">
             Tell us what you want to build. We reply within one working day with questions, a rough
             timeline and a price range.
           </p>
-          <ul className="grid gap-3 border-t border-white/15 pt-6">
+          <ul className="border-line grid gap-3 border-t pt-6">
             {brand.founders.map((f) => (
               <li key={f.id} className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-display text-xl font-bold">{f.name}</span>
-                <span className="text-paper/80 font-mono text-sm select-all">{f.email}</span>
+                <span className="font-display text-xl font-medium">{f.name}</span>
+                <span className="text-muted font-mono text-sm select-all">{f.email}</span>
               </li>
             ))}
-            <li className="text-paper/50 font-mono text-xs tracking-widest uppercase">
+            <li className="text-muted font-mono text-[0.7rem] tracking-widest uppercase">
               {brand.location}
             </li>
           </ul>
@@ -68,18 +69,18 @@ export function ContactSection() {
         {state === 'sent' ? (
           <div
             role="status"
-            className="grid content-center gap-3 rounded-2xl border border-white/15 p-8"
+            className="border-line bg-surface/60 grid content-center gap-3 rounded-2xl border p-8"
           >
-            <p className="font-display text-3xl font-bold">Thanks, we’ve got it.</p>
-            <p className="text-paper/70">We’ll reply within one working day.</p>
+            <p className="font-display text-3xl font-medium">Thanks, we’ve got it.</p>
+            <p className="text-muted">We’ll reply within one working day.</p>
           </div>
         ) : (
           <form
             onSubmit={submit}
-            className="grid content-start gap-5 rounded-2xl border border-white/15 p-6 sm:p-8"
+            className="border-line bg-surface/60 grid content-start gap-5 rounded-2xl border p-6 backdrop-blur-sm sm:p-8"
           >
             <fieldset className="grid gap-3">
-              <legend className="text-paper/60 mb-3 font-mono text-xs tracking-widest uppercase">
+              <legend className="text-muted mb-3 font-mono text-[0.7rem] tracking-widest uppercase">
                 What do you need?
               </legend>
               <div className="flex flex-wrap gap-2">
@@ -93,7 +94,7 @@ export function ContactSection() {
                       'rounded-md border px-4 py-2.5 text-sm font-semibold transition',
                       need === n
                         ? 'border-ember bg-ember text-white'
-                        : 'text-paper border-white/20 hover:border-white/50',
+                        : 'border-line text-ink hover:border-muted',
                     )}
                   >
                     {n}
@@ -102,7 +103,7 @@ export function ContactSection() {
               </div>
             </fieldset>
             <div className="grid gap-5 sm:grid-cols-2">
-              <label className="text-paper/60 grid gap-2 font-mono text-xs tracking-widest uppercase">
+              <label className={label}>
                 Name
                 <input
                   id="contact-name"
@@ -110,10 +111,10 @@ export function ContactSection() {
                   required
                   autoComplete="name"
                   placeholder="Your name"
-                  className={cn(field, 'font-sans text-base tracking-normal normal-case')}
+                  className={field}
                 />
               </label>
-              <label className="text-paper/60 grid gap-2 font-mono text-xs tracking-widest uppercase">
+              <label className={label}>
                 Email
                 <input
                   id="contact-email"
@@ -122,11 +123,11 @@ export function ContactSection() {
                   required
                   autoComplete="email"
                   placeholder="you@company.com"
-                  className={cn(field, 'font-sans text-base tracking-normal normal-case')}
+                  className={field}
                 />
               </label>
             </div>
-            <label className="text-paper/60 grid gap-2 font-mono text-xs tracking-widest uppercase">
+            <label className={label}>
               Project
               <textarea
                 id="contact-message"
@@ -134,14 +135,10 @@ export function ContactSection() {
                 required
                 rows={4}
                 placeholder="A booking app for my clinic, Android first…"
-                className={cn(field, 'resize-y font-sans text-base tracking-normal normal-case')}
+                className={cn(field, 'resize-y')}
               />
             </label>
-            <Button
-              type="submit"
-              disabled={state === 'sending'}
-              className="shadow-[4px_4px_0_var(--color-paper)] hover:shadow-[6px_6px_0_var(--color-paper)]"
-            >
+            <Button type="submit" disabled={state === 'sending'}>
               {state === 'sending' ? 'Sending…' : 'Send project brief →'}
             </Button>
             {state === 'error' && (

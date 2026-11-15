@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { useParams } from 'react-router'
 import { projectBySlug, projects } from '@/content/projects'
-import { DeviceLoop } from '@/features/projects'
+import { DeviceFrame } from '@/features/projects'
 import { brand } from '@/shared/brand'
 import { ButtonLink } from '@/shared/ui/Button'
 import NotFoundPage from './NotFoundPage'
@@ -15,14 +15,16 @@ export default function CaseStudyPage() {
   return (
     <article
       style={{ '--hue': p.hue } as CSSProperties}
-      className="mx-auto grid max-w-6xl gap-12 px-5 pt-36 pb-24 md:grid-cols-2"
+      className="mx-auto grid max-w-6xl items-center gap-12 px-5 pt-36 pb-24 md:grid-cols-2"
     >
       <div className="grid content-start gap-6">
-        <p className="font-mono text-xs tracking-widest text-[var(--hue)] uppercase">
+        <p className="font-mono text-[0.7rem] tracking-widest text-[var(--hue)] uppercase">
           {p.kind}
           {p.status ? ` · ${p.status}` : ''}
         </p>
-        <h1 className="text-[clamp(3rem,8vw,7rem)] leading-[0.9]">{p.name}</h1>
+        <h1 className="text-[clamp(2.4rem,6vw,5.4rem)] leading-none font-medium uppercase">
+          {p.name}
+        </h1>
         <p className="text-muted text-xl">{p.summary}</p>
         <ul className="border-line grid gap-3 border-t pt-6">
           {p.highlights.map((h) => (
@@ -35,16 +37,16 @@ export default function CaseStudyPage() {
           {p.stack.map((t) => (
             <li
               key={t}
-              className="border-line bg-surface/70 text-muted rounded border px-2.5 py-1.5 font-mono text-xs"
+              className="border-line text-muted rounded border px-2.5 py-1.5 font-mono text-[0.7rem]"
             >
               {t}
             </li>
           ))}
         </ul>
-        <p className="text-muted font-mono text-xs tracking-widest uppercase">
+        <p className="text-muted font-mono text-[0.7rem] tracking-widest uppercase">
           Built by {builder.name}
         </p>
-        <div className="flex flex-wrap gap-4 pt-2">
+        <div className="flex flex-wrap items-center gap-4 pt-2">
           {p.link && (
             <a
               href={p.link.href}
@@ -61,17 +63,11 @@ export default function CaseStudyPage() {
           </ButtonLink>
         </div>
       </div>
-      <div className="relative grid place-items-center">
-        <div
-          aria-hidden="true"
-          className="absolute inset-[15%] rounded-full bg-[var(--hue)] opacity-25 blur-3xl"
+      <div className="grid place-items-center">
+        <DeviceFrame
+          project={p}
+          className={p.device === 'phone' ? 'h-[66svh]' : 'w-full max-w-xl'}
         />
-        <DeviceLoop project={p} active className="relative max-h-[70svh]" />
-        {p.illustrative && (
-          <p className="text-muted mt-4 font-mono text-[0.65rem] tracking-widest uppercase">
-            Illustrative preview
-          </p>
-        )}
       </div>
     </article>
   )

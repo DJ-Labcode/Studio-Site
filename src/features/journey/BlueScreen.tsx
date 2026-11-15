@@ -5,7 +5,7 @@ import { LogoMark } from '@/shared/ui/Logo'
 /** The blue laptop screen, in HTML. It matches the footage so the video can hand over to the real page. */
 function Screen({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-web relative grid size-full min-h-svh content-center justify-items-center gap-[3vh] px-5 text-center text-white">
+    <div className="bg-screen relative grid size-full min-h-svh content-center justify-items-center gap-[3vh] px-5 text-center text-white">
       {children}
     </div>
   )
@@ -19,7 +19,7 @@ export function HeroScreen() {
         <span className="font-display flex items-center gap-3 text-[clamp(1rem,1.6vw,1.4rem)] font-bold">
           <LogoMark onDark className="h-7 w-auto" /> {brand.name}
         </span>
-        <span className="text-web rounded-full bg-white px-5 py-3 text-[clamp(0.8rem,1.1vw,1rem)] leading-none font-semibold">
+        <span className="text-screen rounded-full bg-white px-5 py-3 text-[clamp(0.8rem,1.1vw,1rem)] leading-none font-semibold">
           Start a project
         </span>
       </div>

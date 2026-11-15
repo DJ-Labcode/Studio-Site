@@ -52,7 +52,7 @@ function Column({
         <div>
           <p
             className={cn(
-              'font-display text-4xl leading-none font-bold sm:text-7xl',
+              'font-display text-3xl leading-none font-medium uppercase sm:text-5xl',
               tone[world].text,
             )}
           >
@@ -69,10 +69,10 @@ function Column({
           return (
             <li
               key={line}
-              className="font-display text-[clamp(1.05rem,2.6vw,2.3rem)] leading-tight font-bold tracking-tight uppercase"
+              className="font-display text-[clamp(1rem,2vw,1.7rem)] leading-snug font-medium tracking-tight uppercase"
               style={
                 {
-                  opacity: 0.12 + 0.88 * k,
+                  opacity: 0.14 + 0.86 * k,
                   translate: `${(1 - k) * (align === 'right' ? 24 : -24)}px 0`,
                 } as CSSProperties
               }

@@ -12,7 +12,7 @@ import { PULL_FRAMES } from './footage'
  */
 export function PullOut() {
   return (
-    <ScrollSequence urls={PULL_FRAMES} heightVh={420} id="forged" className="bg-web">
+    <ScrollSequence urls={PULL_FRAMES} heightVh={420} id="forged" className="bg-screen">
       {(p) => (
         <>
           <div

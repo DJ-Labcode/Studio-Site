@@ -5,18 +5,18 @@
  * Change a value here and the whole site follows.
  */
 @theme {
-  --color-paper: #fbf7f0;
-  --color-surface: #ffffff;
-  --color-line: #e8e1d5;
-  --color-ink: #16151c;
-  --color-muted: #625f6e;
+  --color-paper: #0a0a0d;
+  --color-surface: #121217;
+  --color-line: #24242c;
+  --color-ink: #f2f0ea;
+  --color-muted: #8f8c99;
   --color-ember: #ff5a1f;
   --color-ember-deep: #e0440c;
   --color-spark: #ffb020;
-  --color-web: #1e2bff;
-  --color-web-soft: #f1f3ff;
+  --color-web: #5b6bff;
   --color-app: #ff5a1f;
-  --color-app-soft: #fff1e2;
+  /* fixed brand blue of the laptop screen in the Blender version */
+  --color-screen: #1e2bff;
 
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -33,7 +33,10 @@
   h1,
   h2,
   h3 {
-    @apply font-display font-bold tracking-tight text-balance;
+    @apply font-display tracking-tight text-balance;
+  }
+  ::selection {
+    @apply bg-ember text-white;
   }
   :focus-visible {
     @apply outline-spark outline-2 outline-offset-2;
@@ -54,6 +57,21 @@
     }
     50% {
       translate: 0 -10px;
+    }
+  }
+}
+
+@theme {
+  /* slow vertical pan for tall screenshots inside a device frame */
+  --animate-pan: pan 14s ease-in-out infinite alternate;
+  @keyframes pan {
+    0%,
+    12% {
+      translate: 0 0;
+    }
+    88%,
+    100% {
+      translate: 0 calc(-100% + 100cqh);
     }
   }
 }

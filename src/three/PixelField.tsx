@@ -2,9 +2,18 @@ import { useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-// soft tints of the brand colours, so the field never competes with the text in front of it
-const COLORS = ['#FFC9B3', '#C5CAFF', '#FFE2A8', '#FFD9C9', '#DADDFF']
-const COUNT = 46
+// mostly near-black blocks that only catch the eye when they move, plus a few accents
+const COLORS = [
+  '#1c1c24',
+  '#22222c',
+  '#1c1c24',
+  '#2a2a36',
+  '#ff5a1f',
+  '#1c1c24',
+  '#22222c',
+  '#5b6bff',
+]
+const COUNT = 70
 
 /** deterministic pseudo-random so the field looks the same on every visit */
 function seeded(seed: number) {

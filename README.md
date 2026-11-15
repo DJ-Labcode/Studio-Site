@@ -69,5 +69,5 @@ The Blender version is also always reachable at `/journey`.
 
 ## Status
 
-Both home versions run. Project footage in `public/work/` is illustrative and should be replaced
-with real screen recordings; EmailJS keys are needed for the contact form to send.
+Both home versions run. To do: add real project screenshots (put images in `public/work/<slug>/`
+and list them in `shots` in `src/content/projects.ts`), and add EmailJS keys so the contact form sends.

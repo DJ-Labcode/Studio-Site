@@ -3,7 +3,7 @@ import { PixelWord } from '@/shared/ui/PixelGlyph'
 
 export function SiteFooter() {
   return (
-    <footer className="bg-paper px-5 pt-16 pb-8">
+    <footer className="border-line border-t px-5 pt-16 pb-8">
       <div className="mx-auto max-w-6xl">
         <PixelWord
           text={brand.name}
