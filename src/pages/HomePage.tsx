@@ -1,20 +1,8 @@
-import { useState } from 'react'
-import { HeroScreen, PullOut, PushIn, Splash } from '@/features/journey'
+import { site } from '@/content/site'
+import BlenderHome from './home/BlenderHome'
+import StoryHome from './home/StoryHome'
 
-/**
- * The home page is one scroll: into the laptop, through the site "inside" it, and back out.
- * The sections inside (worlds, projects, process, builder) are added feature by feature.
- */
+/** Which home page is shown is decided by one line in src/content/site.ts. */
 export default function HomePage() {
-  const [ready, setReady] = useState(false)
-  return (
-    <>
-      {!ready && <Splash onDone={() => setReady(true)} />}
-      <PushIn />
-      <section id="inside" aria-label="Inside the laptop">
-        <HeroScreen />
-      </section>
-      <PullOut />
-    </>
-  )
+  return site.homeVariant === 'blender' ? <BlenderHome /> : <StoryHome />
 }

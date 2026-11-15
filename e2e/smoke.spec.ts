@@ -1,21 +1,22 @@
 import { expect, test } from '@playwright/test'
 
-test('home: the splash lifts and the hero is there', async ({ page }) => {
+test('home: the story runs from the hero to the contact form', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('status')).toBeHidden({ timeout: 15_000 })
-  await expect(page.getByRole('heading', { level: 1 })).toBeAttached()
-  await expect(page.getByRole('link', { name: /start a project/i }).first()).toBeVisible()
-})
-
-test('home: scrolling reaches the ending', async ({ page }) => {
-  await page.goto('/')
-  await expect(page.getByRole('status')).toBeHidden({ timeout: 15_000 })
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-  await expect(page.getByRole('link', { name: /forge my idea/i })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }),
+  )
+  await expect(page.getByRole('button', { name: /send project brief/i })).toBeVisible()
   // the page never scrolls sideways
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   )
+})
+
+test('the Blender version is available at /journey', async ({ page }) => {
+  await page.goto('/journey')
+  await expect(page.getByRole('status')).toBeHidden({ timeout: 15_000 })
+  await expect(page.getByRole('heading', { level: 1 })).toBeAttached()
 })
 
 test('a case study route works', async ({ page }) => {

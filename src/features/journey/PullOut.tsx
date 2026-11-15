@@ -25,7 +25,7 @@ export function PullOut() {
             <p className="text-[0.95rem] font-medium">
               <b>Forged by {brand.name}.</b> Your idea could be next.
             </p>
-            <ButtonLink to="/#forge">Forge my idea →</ButtonLink>
+            <ButtonLink to="/#contact">Forge my idea →</ButtonLink>
           </ActionBar>
         </>
       )}

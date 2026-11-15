@@ -47,7 +47,7 @@ export function PushIn() {
               Open for new projects
             </p>
             <p className="text-[0.95rem] font-medium">{brand.description}</p>
-            <ButtonLink to="/#forge">Start a project →</ButtonLink>
+            <ButtonLink to="/#contact">Start a project →</ButtonLink>
           </ActionBar>
           <div
             className="pointer-events-none absolute inset-0"

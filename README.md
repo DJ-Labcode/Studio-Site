@@ -27,13 +27,13 @@ src/
   app/        entry point, router, root layout
   pages/      one file per route; pages compose features
   features/   one folder per part of the site, each with an index.ts as its public surface
-    journey/    splash, hero, scroll sequences
-    worlds/     split screen, Web world, App world
-    projects/   case studies and working demos
-    builder/    app estimator (pure pricing logic + UI)
-    process/    "How we work"
-    team/       the two founders
+    hero/       opening statement
+    services/   what we do: web and apps
+    team/       about us
+    projects/   work showcase and project footage
     contact/    brief form, EmailJS
+    journey/    the Blender version: splash and scroll-scrubbed footage
+    builder/    app estimator (pricing logic, UI to come)
   three/      WebGL scenes, always imported lazily
   content/    data only: projects, pricing
   shared/     brand, ui, hooks, lib, styles (design tokens)
@@ -57,7 +57,17 @@ e2e/            Playwright tests
 - **Brand in one place.** Name, founders and tagline live in `src/shared/brand`; colours and fonts in `src/shared/styles/index.css`.
 - **Heavy code is lazy.** Pages are lazy routes; anything using three.js is behind a dynamic import.
 
+## Switching the home page
+
+Two versions of the home page live in the repo. Pick one with a single line in `src/content/site.ts`:
+
+```ts
+homeVariant: 'story' // or 'blender'
+```
+
+The Blender version is also always reachable at `/journey`.
+
 ## Status
 
-Foundation only: tooling, structure, brand, tokens, routing, pricing logic and tests.
-Features are being moved in from the prototype one at a time.
+Both home versions run. Project footage in `public/work/` is illustrative and should be replaced
+with real screen recordings; EmailJS keys are needed for the contact form to send.
