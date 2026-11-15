@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DuoForge film</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      html, body { margin: 0; background: #F4EFE6; overflow: hidden; }
+      #stage { position: relative; width: 1920px; height: 1080px; }
+      canvas { display: block; }
+      #cap {
+        position: absolute; left: 140px; bottom: 150px; color: #F5F3EE; font: 700 84px/1 'Space Grotesk', sans-serif;
+        letter-spacing: -0.03em; text-shadow: 0 4px 40px rgb(0 0 0 / .6); max-width: 1100px;
+      }
+      #cap small { display: block; font: 500 22px/1 'JetBrains Mono', monospace; color: #FF5A1F; letter-spacing: .16em; margin-bottom: 22px; text-transform: uppercase; }
+      #cap em { font-style: normal; color: #FF5A1F; }
+      body.clean #cap { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"><div id="cap"></div></div>
+    <script type="module" src="./day.ts"></script>
+  </body>
+</html>
