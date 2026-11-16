@@ -13,9 +13,6 @@ export const railStop = (line: RailLine, lane: RailLane, big = false) => ({
   ...(big ? { 'data-rail-big': '' } : {}),
 })
 
-/** Spread on a block that should wait for its train: it gets `data-arrived` when the train reaches its station. */
-export const railReveal = { 'data-rail-reveal': '' } as const
-
 /** Spread on the element both lines end at. */
 export const railTerminus = { 'data-rail-terminus': '' } as const
 

@@ -1,21 +1,31 @@
 import { lazy, Suspense } from 'react'
-import { projects } from '@/content/projects'
+import { featuredIn, projects, shortName } from '@/content/projects'
 import { brand } from '@/shared/brand'
 import { palette } from '@/shared/brand/palette'
 import { RAIL_SECTIONS } from '@/shared/lib/rail'
 import { Eyebrow } from '@/shared/ui/Eyebrow'
 import { Lane } from '@/shared/ui/Lane'
-import { Choices } from './Choices'
 import { DepartureBoard } from './DepartureBoard'
+import { IdeaBox } from './IdeaBox'
 
 const ForgeCanvas = lazy(() => import('@/three/ForgeCanvas'))
 
-const names = (world: string) =>
-  projects.filter((p) => p.world === world).map((p) => p.name.replace(' platform', ''))
-/** the dark train carries the websites (wide panels), the orange train the apps (tall panels) */
+/** the dark train carries the websites (wide panels), the orange train the apps (tall panels); each shows its first two */
 const TRAINS = [
-  { color: palette.ink, wide: true, names: names('web') },
-  { color: palette.ember, wide: false, names: names('app') },
+  {
+    color: palette.ink,
+    wide: true,
+    names: featuredIn('web').slice(0, 2).map(shortName),
+    label: 'Websites',
+    href: `#${RAIL_SECTIONS.web}`,
+  },
+  {
+    color: palette.ember,
+    wide: false,
+    names: featuredIn('app').slice(0, 2).map(shortName),
+    label: 'Apps',
+    href: `#${RAIL_SECTIONS.apps}`,
+  },
 ] as const
 
 const FACTS = [
@@ -25,31 +35,24 @@ const FACTS = [
 ]
 
 /**
- * The home screen is the station. On the left the visitor answers one question; on the right is
+ * The home screen is the station. On the left the visitor says what they want to build; on the right is
  * one card: the 3D forge (a sketch goes in, a finished screen comes out) above the departure board.
  */
 export function Hero() {
   return (
     <section id={RAIL_SECTIONS.top}>
-      <Lane className="grid items-center gap-x-11 gap-y-9 pt-28 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="grid min-w-0 gap-5">
+      <Lane className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-11 gap-y-9 pt-28 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
           <Eyebrow>
             Web &amp; app studio <span className="text-ember">·</span>{' '}
             {brand.location.split(',')[0]}
           </Eyebrow>
-          <h1 className="max-w-[11ch] text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.02] font-bold">
-            What do you want to build?
+          <h1 className="text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.02] font-bold">
+            <label htmlFor="idea">I want to build</label>
           </h1>
-          <Choices />
+          <IdeaBox id="idea" />
           <p className="text-muted max-w-[40ch] text-[1.0625rem]">
-            Pick one and follow the train. Or go straight to{' '}
-            <a
-              href={`#${RAIL_SECTIONS.contact}`}
-              className="text-ink font-semibold underline underline-offset-4"
-            >
-              the ticket counter
-            </a>
-            .
+            Say it in your own words. It goes straight onto your ticket, and we reply with a plan.
           </p>
           <dl className="border-line mt-1.5 flex flex-wrap gap-x-8 gap-y-3.5 border-t pt-5">
             {FACTS.map((f) => (
@@ -73,7 +76,7 @@ export function Hero() {
                 label="Two trains carry sketches into the forge and bring out finished project screens"
               />
             </Suspense>
-            <p className="bg-ink text-paper absolute top-4 left-4 rounded-full px-3 py-2 text-[0.6875rem] leading-none font-medium tracking-[0.14em] uppercase">
+            <p className="bg-ink text-paper absolute top-4 left-4 rounded-full px-3 py-2 text-[0.6875rem] leading-none font-medium tracking-[0.14em] uppercase max-md:hidden">
               {brand.nameParts[0]}
               <span className="text-ember">{brand.nameParts[1]}</span> Central
             </p>

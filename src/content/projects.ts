@@ -16,12 +16,15 @@ export type Project = {
   shots: string[]
   link?: { label: string; href: string }
   status?: string
+  /** false keeps a project off the home page; it still appears in the timetable and has its own page */
+  featured?: boolean
 }
 
 /**
  * Only projects named in the founders' own profiles appear here.
  * To add screenshots: put the images in public/work/<slug>/ and list their paths in `shots`.
- * Adding one is all it takes to list it and give it a /work/:slug page.
+ * Adding one is all it takes to list it in the timetable (/work) and give it a /work/:slug page.
+ * The home page shows at most HOME_COACHES per line, in this order; set `featured: false` to leave one out.
  */
 export const projects: Project[] = [
   {
@@ -110,3 +113,12 @@ export const projects: Project[] = [
 
 export const projectBySlug = (slug: string) => projects.find((p) => p.slug === slug)
 export const projectsIn = (world: World) => projects.filter((p) => p.world === world)
+
+/** the home page never shows more coaches than this per line, however long the list gets */
+export const HOME_COACHES = 4
+export const featuredIn = (world: World) =>
+  projectsIn(world)
+    .filter((p) => p.featured !== false)
+    .slice(0, HOME_COACHES)
+/** the name as it fits on a board or a small panel */
+export const shortName = (p: Project) => p.name.replace(' platform', '')
