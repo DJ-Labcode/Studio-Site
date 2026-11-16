@@ -1,63 +1,63 @@
-import { clamp01, segment } from '@/shared/lib/math'
+import { segment } from '@/shared/lib/math'
 
 /** Key moments of the splash, in milliseconds from the start. */
 export const SPLASH = {
-  enter: 150,
-  hit: 950,
-  open: 1420,
-  opened: 2220,
-  hold: 2820,
-  landed: 3520,
-  end: 4150,
+  arrive: 200,
+  coupled: 1300,
+  lift: 1850,
+  lifted: 2550,
+  depart: 2150,
+  departed: 3050,
+  fly: 3050,
+  landed: 3750,
+  end: 3950,
 } as const
 
 export const easeOut = (x: number) => 1 - Math.pow(1 - x, 3)
+export const easeIn = (x: number) => x * x * x
 export const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
 
 export type SplashProgress = {
-  /** 0..1 the two halves and their letters sliding in (linear; ease it where it is used) */
-  enter: number
-  /** letter scale: a small, quickly fading bounce right after the hit */
-  settle: number
+  /** 0..1 the two trains rolling in until they couple */
+  arrive: number
+  /** -1..1 the small, quickly fading jolt right after coupling */
+  jolt: number
   /** 0..1 life of the ring and sparks, or null when they are not on screen */
   strike: number | null
-  /** 0..1 the orange half folding into the F */
-  fold: number
-  /** 0..1 "uo" sliding out of the D */
-  uo: number
-  /** 0..1 "orge" sliding out of the F */
-  orge: number
-  /** 0..1 width of the underline (grows, then leaves) */
-  underline: number
-  /** 0..1 opacity of the tagline */
-  tag: number
-  /** 0..1 the wordmark travelling from the centre to the header */
+  /** 0..1 the letters rising off the coaches and closing up into the name */
+  lift: number
+  /** true from the moment the letters leave the coaches */
+  lifted: boolean
+  /** 0..1 the empty trains driving away */
+  depart: number
+  /** 0..1 the name travelling to the header */
   fly: number
   /** 0..1 the page showing through */
   reveal: number
+  /** 0..1 opacity of the rail the trains stand on */
+  rail: number
 }
 
 /** Everything the splash draws is a pure function of time, so any moment can be rendered and tested. */
 export function splashProgress(t: number): SplashProgress {
   const T = SPLASH
-  const strike = segment(t, T.hit, T.hit + 700)
+  const strike = segment(t, T.coupled, T.coupled + 700)
+  const since = t - T.coupled
   return {
-    enter: segment(t, T.enter, T.hit),
-    settle: t > T.hit ? 1 + 0.07 * Math.exp(-(t - T.hit) / 90) * Math.cos((t - T.hit) / 55) : 1,
+    arrive: easeOut(segment(t, T.arrive, T.coupled)),
+    jolt: since > 0 ? Math.exp(-since / 110) * Math.cos(since / 60) : 0,
     strike: strike > 0 && strike < 1 ? strike : null,
-    fold: easeInOut(segment(t, T.hit + 300, T.open + 220)),
-    uo: easeInOut(segment(t, T.open, T.open + 560)),
-    orge: easeInOut(segment(t, T.open + 220, T.opened)),
-    underline:
-      easeOut(segment(t, T.opened - 120, T.opened + 380)) * (1 - segment(t, T.hold, T.hold + 220)),
-    tag: segment(t, T.opened + 60, T.opened + 420) * (1 - segment(t, T.hold - 60, T.hold + 160)),
-    fly: easeInOut(segment(t, T.hold, T.landed)),
-    reveal: easeInOut(clamp01(segment(t, T.hold + 150, T.landed + 250))),
+    lift: easeInOut(segment(t, T.lift, T.lifted)),
+    lifted: t >= T.lift,
+    depart: easeIn(segment(t, T.depart, T.departed)),
+    fly: easeInOut(segment(t, T.fly, T.landed)),
+    reveal: easeInOut(segment(t, T.fly + 60, T.landed + 120)),
+    rail: segment(t, T.arrive, T.arrive + 500) * (1 - segment(t, T.departed - 300, T.departed)),
   }
 }
 
-/** A letter's offset on its way in from a corner: starts at (sx, sy), ends at (0, 0). */
-export const entryOffset = (enter: number, sx: number, sy: number): [number, number] => {
-  const rest = 1 - easeOut(enter)
-  return [sx * rest, sy * rest]
-}
+const mix = (a: number, b: number, k: number) => a + (b - a) * k
+
+/** A value that goes from `start` to `mid` as the letters lift, then on to `end` as the name flies to the header. */
+export const threeStops = (start: number, mid: number, end: number, lift: number, fly: number) =>
+  mix(mix(start, mid, lift), end, fly)

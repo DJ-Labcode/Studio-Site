@@ -36,3 +36,12 @@ test('the splash plays on the home page and hands over to the header logo', asyn
   await expect(splash).toBeHidden({ timeout: 10_000 })
   await expect(page.getByRole('link', { name: /duoforge home/i })).toBeVisible()
 })
+
+test('the answer picked on the home screen is already chosen on the contact ticket', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.getByRole('link', { name: /an app/i }).click()
+  await expect(page.getByRole('radio', { name: 'An app' })).toBeChecked()
+})

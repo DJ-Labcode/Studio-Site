@@ -1,35 +1,89 @@
+import { lazy, Suspense } from 'react'
+import { projects } from '@/content/projects'
 import { brand } from '@/shared/brand'
-import { ButtonLink } from '@/shared/ui/Button'
+import { palette } from '@/shared/brand/palette'
+import { RAIL_SECTIONS } from '@/shared/lib/rail'
+import { Eyebrow } from '@/shared/ui/Eyebrow'
+import { Lane } from '@/shared/ui/Lane'
+import { Choices } from './Choices'
+import { DepartureBoard } from './DepartureBoard'
 
-/** Opening statement: quiet, left-aligned, with room around it. The background keeps drifting on its own. */
+const ForgeCanvas = lazy(() => import('@/three/ForgeCanvas'))
+
+const names = (world: string) =>
+  projects.filter((p) => p.world === world).map((p) => p.name.replace(' platform', ''))
+/** the dark train carries the websites (wide panels), the orange train the apps (tall panels) */
+const TRAINS = [
+  { color: palette.ink, wide: true, names: names('web') },
+  { color: palette.ember, wide: false, names: names('app') },
+] as const
+
+const FACTS = [
+  { value: String(projects.length), label: 'projects built' },
+  { value: '100+', label: 'learners on HSC-iT' },
+  { value: 'Live', label: 'on Google Play', accent: true },
+]
+
+/**
+ * The home screen is the station. On the left the visitor answers one question; on the right is
+ * one card: the 3D forge (a sketch goes in, a finished screen comes out) above the departure board.
+ */
 export function Hero() {
   return (
-    <section id="top" className="relative grid min-h-svh grid-rows-[1fr_auto] px-5 pt-28 pb-8">
-      <div className="mx-auto grid w-full max-w-6xl content-center gap-8">
-        <p className="text-muted font-mono text-[0.7rem] leading-relaxed tracking-[0.18em] uppercase">
-          {brand.name}
-          <br />
-          Web &amp; app studio · {brand.location}
-        </p>
-        <h1 className="max-w-[18ch] text-[clamp(2.2rem,5.4vw,5rem)] leading-[1.02] font-medium tracking-tight uppercase">
-          We forge <span className="text-web">websites</span> and{' '}
-          <span className="text-ember">apps</span> people love.
-        </h1>
-      </div>
-      <div className="border-line mx-auto flex w-full max-w-6xl flex-wrap items-end justify-between gap-6 border-t pt-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <ButtonLink to="/#contact">Start a project →</ButtonLink>
-          <ButtonLink to="/#work" variant="ghost">
-            See our work
-          </ButtonLink>
+    <section id={RAIL_SECTIONS.top}>
+      <Lane className="grid items-center gap-x-11 gap-y-9 pt-28 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="grid min-w-0 gap-5">
+          <Eyebrow>
+            Web &amp; app studio <span className="text-ember">·</span>{' '}
+            {brand.location.split(',')[0]}
+          </Eyebrow>
+          <h1 className="max-w-[11ch] text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.02] font-bold">
+            What do you want to build?
+          </h1>
+          <Choices />
+          <p className="text-muted max-w-[40ch] text-[1.0625rem]">
+            Pick one and follow the train. Or go straight to{' '}
+            <a
+              href={`#${RAIL_SECTIONS.contact}`}
+              className="text-ink font-semibold underline underline-offset-4"
+            >
+              the ticket counter
+            </a>
+            .
+          </p>
+          <dl className="border-line mt-1.5 flex flex-wrap gap-x-8 gap-y-3.5 border-t pt-5">
+            {FACTS.map((f) => (
+              <div key={f.label} className="grid gap-0.5">
+                <dt
+                  className={`font-display text-3xl leading-none font-bold tracking-tight ${f.accent ? 'text-ember' : ''}`}
+                >
+                  {f.value}
+                </dt>
+                <dd className="text-muted text-[0.8125rem]">{f.label}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <p
-          aria-hidden="true"
-          className="text-muted flex items-center gap-3 font-mono text-[0.7rem] tracking-[0.18em] uppercase"
-        >
-          Scroll <span className="bg-ember inline-block h-8 w-px animate-pulse" />
-        </p>
-      </div>
+
+        <div className="border-line bg-surface min-w-0 overflow-hidden rounded-[22px] border shadow-[0_40px_70px_-45px_rgb(22_21_28/0.45)] md:rounded-[28px]">
+          <div className="relative aspect-[16/10] bg-[radial-gradient(circle_at_50%_56%,#ffe4d7_0_36%,transparent_36.4%),linear-gradient(#ffffff,#fdf5ec)]">
+            <Suspense fallback={null}>
+              <ForgeCanvas
+                trains={TRAINS}
+                label="Two trains carry sketches into the forge and bring out finished project screens"
+              />
+            </Suspense>
+            <p className="bg-ink text-paper absolute top-4 left-4 rounded-full px-3 py-2 text-[0.6875rem] leading-none font-medium tracking-[0.14em] uppercase">
+              {brand.nameParts[0]}
+              <span className="text-ember">{brand.nameParts[1]}</span> Central
+            </p>
+            <Eyebrow className="absolute inset-x-0 bottom-3 text-center max-md:hidden">
+              Sketch in <span className="text-ember">→</span> finished screen out
+            </Eyebrow>
+          </div>
+          <DepartureBoard />
+        </div>
+      </Lane>
     </section>
   )
 }
