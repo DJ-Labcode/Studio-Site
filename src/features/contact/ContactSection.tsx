@@ -22,33 +22,35 @@ const small = 'text-muted text-[0.6875rem] font-medium tracking-[0.14em] upperca
 /**
  * The last stop. Both lines end in a ring above an orange block that holds a ticket:
  * the form is the ticket, and its tear-off stub lists the two people who will work on the project.
- * The choice made on the home screen is already selected.
+ * Whatever the visitor typed on the home screen is already written on it.
  */
 export function ContactSection() {
   const need = useVisit((s) => s.need)
   const choose = useVisit((s) => s.choose)
+  const brief = useVisit((s) => s.brief)
+  const setBrief = useVisit((s) => s.setBrief)
   const [state, setState] = useState<State>('idle')
   const needLabel = NEEDS.find((n) => n.need === need)?.label ?? 'Both'
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
-    const brief = {
+    const sent = {
       name: String(data.get('name')),
       email: String(data.get('email')),
-      message: String(data.get('message')),
+      message: brief,
       summary: needLabel,
     }
     if (!isConfigured()) {
       // no EmailJS keys yet: open the visitor's mail app with the brief filled in
       const to = brand.founders.map((f) => f.email).join(',')
-      const body = `Name: ${brief.name}\nEmail: ${brief.email}\nNeed: ${needLabel}\n\n${brief.message}`
+      const body = `Name: ${sent.name}\nEmail: ${sent.email}\nNeed: ${needLabel}\n\n${sent.message}`
       window.location.href = `mailto:${to}?subject=${encodeURIComponent(`New project: ${needLabel}`)}&body=${encodeURIComponent(body)}`
       return
     }
     setState('sending')
     try {
-      await sendBrief(brief)
+      await sendBrief(sent)
       setState('sent')
     } catch {
       setState('error')
@@ -151,6 +153,8 @@ export function ContactSection() {
                     name="message"
                     required
                     rows={4}
+                    value={brief}
+                    onChange={(e) => setBrief(e.target.value)}
                     placeholder="What it should do, and when you need it"
                     className={cn(field, 'resize-y')}
                   />

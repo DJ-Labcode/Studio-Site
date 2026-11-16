@@ -37,11 +37,24 @@ test('the splash plays on the home page and hands over to the header logo', asyn
   await expect(page.getByRole('link', { name: /duoforge home/i })).toBeVisible()
 })
 
-test('the answer picked on the home screen is already chosen on the contact ticket', async ({
+test('what the visitor types on the home screen is already on the contact ticket', async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
-  await page.getByRole('link', { name: /an app/i }).click()
+  await page.getByLabel('I want to build').fill('an app for my students')
+  await page.getByRole('button', { name: /^go/i }).click()
+  await expect(page.getByLabel('Tell us about it')).toHaveValue(
+    'I want to build an app for my students',
+  )
   await expect(page.getByRole('radio', { name: 'An app' })).toBeChecked()
+})
+
+test('the timetable lists every project and filters by line', async ({ page }) => {
+  await page.goto('/work')
+  await expect(page.getByRole('heading', { level: 1, name: /all departures/i })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'HSC-iT' })).toBeVisible()
+  await page.getByRole('button', { name: 'Websites' }).click()
+  await expect(page.getByRole('link', { name: 'HSC-iT' })).toBeHidden()
+  await expect(page.getByRole('link', { name: 'Mind of Finance' })).toBeVisible()
 })

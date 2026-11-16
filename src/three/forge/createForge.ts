@@ -4,6 +4,9 @@ import { palette } from '@/shared/brand/palette'
 /** One train on the loop: its colour, the shape of its panels and the name shown on each. */
 export type ForgeTrain = { color: string; wide: boolean; names: readonly string[] }
 
+/** Optional HTML elements, one per train, that the scene keeps pinned above each train's nose. */
+export type ForgeLabels = readonly (HTMLElement | null)[]
+
 type Unit = {
   obj: T.Object3D
   /** distance behind the nose, in world units along the track */
@@ -93,7 +96,11 @@ function archShape(half: number, wall: number, thick: number) {
  */
 export function createForge(
   canvas: HTMLCanvasElement,
-  { trains, still }: { trains: readonly ForgeTrain[]; still: boolean },
+  {
+    trains,
+    still,
+    labels = [],
+  }: { trains: readonly ForgeTrain[]; still: boolean; labels?: ForgeLabels },
 ): () => void {
   const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -344,6 +351,7 @@ export function createForge(
   const seen = new IntersectionObserver(([entry]) => (visible = entry?.isIntersecting ?? true))
   seen.observe(canvas)
 
+  const spot = new T.Vector3()
   let raf = 0
   const tick = (now: number) => {
     raf = requestAnimationFrame(tick)
@@ -400,6 +408,19 @@ export function createForge(
     world.rotation.y += ((still ? 0 : pointerX * 0.2) - world.rotation.y) * 0.05
     world.rotation.x += ((still ? 0 : pointerY * 0.05) - world.rotation.x) * 0.05
     renderer.render(scene, camera)
+
+    fleet.forEach((train, i) => {
+      const label = labels[i]
+      if (!label) return
+      train.units[0]!.obj.getWorldPosition(spot)
+      const inFront = spot.z > -0.4
+      spot.y += 1
+      spot.project(camera)
+      const x = (spot.x * 0.5 + 0.5) * canvas.clientWidth - label.offsetWidth / 2
+      const y = (-spot.y * 0.5 + 0.5) * canvas.clientHeight - label.offsetHeight
+      label.style.transform = `translate(${x}px, ${y}px)`
+      label.style.opacity = inFront ? '1' : '0.35'
+    })
   }
   raf = requestAnimationFrame(tick)
 

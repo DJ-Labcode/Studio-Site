@@ -29,7 +29,6 @@ type Stop = {
   ripple: SVGCircleElement
   fill: number
   arrivedAt: number
-  reveal: Element | null
 }
 
 /**
@@ -161,7 +160,6 @@ export function Railway() {
           ripple,
           fill: previous[i]?.fill ?? 0,
           arrivedAt: previous[i]?.arrivedAt ?? 0,
-          reveal: el.closest('[data-rail-reveal]'),
         }
       })
 
@@ -284,10 +282,7 @@ export function Railway() {
       for (const s of stops) {
         const head = tracks.find((t) => t.line === s.line)?.headY ?? 0
         const arrived = head >= s.y - 2
-        if (arrived && !s.arrivedAt) {
-          s.arrivedAt = now
-          s.reveal?.setAttribute('data-arrived', '')
-        }
+        if (arrived && !s.arrivedAt) s.arrivedAt = now
         s.fill += ((arrived ? 1 : 0) - s.fill) * (still ? 1 : 0.16)
         s.dot.setAttribute('r', String(Math.max(0, (s.radius - 4.5) * s.fill)))
         // a ripple when the train pulls in
@@ -315,12 +310,6 @@ export function Railway() {
     observer.observe(box)
     void document.fonts.ready.then(relayout)
     raf = requestAnimationFrame(frame)
-    // with reduced motion nothing waits for a train
-    if (still)
-      box
-        .querySelectorAll('[data-rail-reveal]')
-        .forEach((el) => el.setAttribute('data-arrived', ''))
-
     return () => {
       cancelAnimationFrame(raf)
       cancelAnimationFrame(queued)
