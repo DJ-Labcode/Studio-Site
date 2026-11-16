@@ -1,34 +1,42 @@
 import { describe, expect, it } from 'vitest'
-import { entryOffset, SPLASH, splashProgress } from './timeline'
+import { SPLASH, splashProgress, threeStops } from './timeline'
 
 describe('splashProgress', () => {
-  it('starts with nothing open and the page hidden', () => {
-    const p = splashProgress(0)
-    expect(p).toMatchObject({ enter: 0, strike: null, fold: 0, uo: 0, orge: 0, fly: 0, reveal: 0 })
+  it('starts with the trains away and the page hidden', () => {
+    expect(splashProgress(0)).toMatchObject({
+      arrive: 0,
+      jolt: 0,
+      strike: null,
+      lift: 0,
+      lifted: false,
+      depart: 0,
+      fly: 0,
+      reveal: 0,
+    })
   })
 
-  it('strikes only after the letters meet', () => {
-    expect(splashProgress(SPLASH.hit - 1).strike).toBeNull()
-    expect(splashProgress(SPLASH.hit + 100).strike).toBeGreaterThan(0)
-    expect(splashProgress(SPLASH.hit + 800).strike).toBeNull()
+  it('strikes only once the trains have coupled', () => {
+    expect(splashProgress(SPLASH.coupled - 1).strike).toBeNull()
+    expect(splashProgress(SPLASH.coupled).arrive).toBe(1)
+    expect(splashProgress(SPLASH.coupled + 100).strike).toBeGreaterThan(0)
+    expect(splashProgress(SPLASH.coupled + 800).strike).toBeNull()
   })
 
-  it('folds the orange half away before the name has opened', () => {
-    expect(splashProgress(SPLASH.open + 220).fold).toBe(1)
-    expect(splashProgress(SPLASH.open + 220).orge).toBe(0)
-    expect(splashProgress(SPLASH.opened)).toMatchObject({ uo: 1, orge: 1 })
+  it('lifts the letters before the trains have gone, and flies only after', () => {
+    expect(splashProgress(SPLASH.lift).lifted).toBe(true)
+    expect(splashProgress(SPLASH.lifted)).toMatchObject({ lift: 1, fly: 0 })
+    expect(splashProgress(SPLASH.departed).depart).toBe(1)
   })
 
-  it('ends in the header with the page fully shown and the extras gone', () => {
-    const p = splashProgress(SPLASH.end)
-    expect(p).toMatchObject({ fly: 1, reveal: 1, underline: 0, tag: 0, settle: expect.any(Number) })
-    expect(p.settle).toBeCloseTo(1, 5)
+  it('ends in the header with the page fully shown', () => {
+    expect(splashProgress(SPLASH.end)).toMatchObject({ fly: 1, reveal: 1, rail: 0 })
   })
 })
 
-describe('entryOffset', () => {
-  it('goes from the corner to rest', () => {
-    expect(entryOffset(0, -100, -50)).toEqual([-100, -50])
-    expect(entryOffset(1, -100, -50).map(Math.abs)).toEqual([0, 0])
+describe('threeStops', () => {
+  it('passes through start, middle and end', () => {
+    expect(threeStops(10, 20, 30, 0, 0)).toBe(10)
+    expect(threeStops(10, 20, 30, 1, 0)).toBe(20)
+    expect(threeStops(10, 20, 30, 1, 1)).toBe(30)
   })
 })

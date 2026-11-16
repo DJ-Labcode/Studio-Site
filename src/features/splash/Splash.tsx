@@ -1,22 +1,57 @@
 import { useEffect, useRef } from 'react'
 import { brand } from '@/shared/brand'
+import { palette } from '@/shared/brand/palette'
 import { WORDMARK_ANCHOR } from '@/shared/ui/Wordmark'
-import { easeOut, entryOffset, SPLASH, splashProgress } from './timeline'
+import { easeOut, SPLASH, splashProgress, threeStops } from './timeline'
 
 const NS = 'http://www.w3.org/2000/svg'
-const INK = '#16151c'
-const EMBER = '#ff5a1f'
 const SPARKS = 14
-
 const [first, second] = brand.nameParts
-const [capA, restA] = [first.slice(0, 1), first.slice(1)]
-const [capB, restB] = [second.slice(0, 1), second.slice(1)]
+const LETTERS = [...first, ...second]
+const SPLIT = first.length
+
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+const blend = (from: string, to: string, k: number) => {
+  const a = rgb(from)
+  const b = rgb(to)
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i]! - v) * k)).join(',')})`
+}
+
+/** Side view of a bullet-train nose; `flip` points it to the right. */
+function Nose({ flip = false }: { flip?: boolean }) {
+  const shape = flip
+    ? 'polygon(0 0, 0 100%, 88% 100%, 100% 82%, 94% 62%, 48% 6%, 30% 0)'
+    : 'polygon(100% 0, 100% 100%, 12% 100%, 0 82%, 6% 62%, 52% 6%, 70% 0)'
+  const glass = flip
+    ? 'polygon(0 0, 62% 0, 100% 100%, 0 100%)'
+    : 'polygon(38% 0, 100% 0, 100% 100%, 0 100%)'
+  return (
+    <div data-s="nose" className="relative bg-current" style={{ clipPath: shape }}>
+      <i
+        className="absolute top-[16%] h-[30%] w-[30%] rounded bg-[#cfe3ee]"
+        style={{ clipPath: glass, [flip ? 'left' : 'right']: '8%' }}
+      />
+    </div>
+  )
+}
+
+function Coach({ letter, light }: { letter: string; light: string }) {
+  return (
+    <div data-s="coach" className="relative grid place-items-center bg-current leading-none">
+      <span data-s="on" style={{ color: light }}>
+        {letter}
+      </span>
+      <i className="absolute inset-x-[12%] -bottom-[9%] h-[9%] rounded-b-md bg-[#3a3844]" />
+    </div>
+  )
+}
 
 /**
  * Opening animation, played once per page load.
- * A light half carrying the D and an orange half carrying the F slide together; where the letters meet,
- * a ring and sparks burst out; the orange folds into the F; the name opens; and the wordmark travels
- * to the header logo (the element marked with WORDMARK_ANCHOR), where the real logo takes over.
+ * Two bullet trains roll in along one diagonal: the dark one carries the first half of the name,
+ * the orange one the second half. They couple with a ring and sparks, the letters lift off into
+ * the wordmark, the trains drive away, and the name travels to the header logo (the element
+ * marked with WORDMARK_ANCHOR), where the real logo takes over.
  */
 export function Splash({ onDone }: { onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null)
@@ -28,85 +63,122 @@ export function Splash({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     const el = root.current
     if (!el) return
-    const q = <T extends Element>(name: string) => el.querySelector<T>(`[data-s="${name}"]`)!
-    const veil = q<HTMLElement>('veil')
-    const mark = q<HTMLElement>('mark')
-    const d = q<HTMLElement>('d')
-    const f = q<HTMLElement>('f')
-    const uo = q<HTMLElement>('uo')
-    const orge = q<HTMLElement>('orge')
-    const orange = q<HTMLElement>('orange')
-    const f2 = q<HTMLElement>('f2')
-    const under = q<HTMLElement>('under')
-    const tag = q<HTMLElement>('tag')
-    const fx = q<SVGSVGElement>('fx')
-    const fx2 = q<SVGSVGElement>('fx2')
+    const one = <T extends Element>(name: string) => el.querySelector<T>(`[data-s="${name}"]`)!
+    const all = <T extends Element>(name: string) => [
+      ...el.querySelectorAll<T>(`[data-s="${name}"]`),
+    ]
+    const veil = one<HTMLElement>('veil')
+    const rail = one<HTMLElement>('rail')
+    const a = one<HTMLElement>('a')
+    const b = one<HTMLElement>('b')
+    const fx = one<SVGSVGElement>('fx')
+    const measure = one<HTMLElement>('measure')
+    const onCoach = all<HTMLElement>('on')
+    const free = all<HTMLElement>('free')
     const anchor = document.querySelector<HTMLElement>(`[${WORDMARK_ANCHOR}]`)
 
     let W = 0
     let H = 0
-    let size = 0
-    let wD = 0
-    let wF = 0
-    let wUo = 0
-    let wOrge = 0
-    let hM = 0
-    let target = { x: 24, y: 24, scale: 0.2 }
+    let u = 1
+    let coachH = 0
+    let coupling = 0
+    /** each letter's place in the wordmark at 100px, and where it rides on its coach */
+    let slots: { x: number; w: number }[] = []
+    let rides: { x: number; y: number; k: number }[] = []
+    let wordW = 1
 
-    const measure = () => {
+    const place = () => {
       W = window.innerWidth
       H = window.innerHeight
-      size = Math.min(150, W * 0.17)
-      mark.style.fontSize = `${size}px`
-      mark.style.transform = 'none'
-      d.style.transform = f.style.transform = 'none'
-      uo.style.width = orge.style.width = 'auto'
-      wUo = uo.getBoundingClientRect().width
-      wOrge = orge.getBoundingClientRect().width
-      wD = d.getBoundingClientRect().width
-      wF = f.getBoundingClientRect().width
-      hM = mark.getBoundingClientRect().height
-      const r = anchor?.getBoundingClientRect()
-      if (r && r.width > 0)
-        target = { x: r.left, y: r.top, scale: r.width / (wD + wUo + wF + wOrge) }
+      u = Math.min(1, W / 1320)
+      const cw = 104 * u
+      const gap = 8 * u
+      const nose = 128 * u
+      coachH = 118 * u
+      const wA = nose + SPLIT * (cw + gap)
+      const wB = (LETTERS.length - SPLIT) * (cw + gap) + nose
+      const x0 = (W - (wA + wB)) / 2
+      const y = H / 2 - coachH / 2
+      coupling = x0 + wA
+      for (const [train, x] of [
+        [a, x0],
+        [b, coupling],
+      ] as const) {
+        Object.assign(train.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+          height: `${coachH}px`,
+          gap: `${gap}px`,
+          transform: 'none',
+        })
+      }
+      all<HTMLElement>('coach').forEach((c) =>
+        Object.assign(c.style, {
+          width: `${cw}px`,
+          borderRadius: `${14 * u}px`,
+          fontSize: `${84 * u}px`,
+        }),
+      )
+      all<HTMLElement>('nose').forEach((n) => (n.style.width = `${nose}px`))
+      rail.style.top = `${y + coachH * 1.09}px`
+
+      const m = measure.getBoundingClientRect()
+      wordW = m.width
+      slots = [...measure.children].map((s) => {
+        const r = s.getBoundingClientRect()
+        return { x: r.left - m.left, w: r.width }
+      })
+      const k = 0.84 * u
+      rides = onCoach.map((s, i) => {
+        const r = s.getBoundingClientRect()
+        return {
+          x: r.left + r.width / 2 - (slots[i]!.w * k) / 2,
+          y: r.top + r.height / 2 - 50 * k,
+          k,
+        }
+      })
     }
 
-    const draw = (into: SVGSVGElement, k: number, c1: string, c2: string) => {
-      const u = size / 150
+    const strike = (k: number | null) => {
+      fx.replaceChildren()
+      if (k === null) return
       const add = (name: string, attrs: Record<string, string | number>) => {
         const node = document.createElementNS(NS, name)
         for (const key in attrs) node.setAttribute(key, String(attrs[key]))
-        into.appendChild(node)
+        fx.appendChild(node)
       }
-      const cx = W / 2
+      const cx = coupling
       const cy = H / 2
       const fade = 1 - k
-      const ring = { cx, cy, fill: 'none' }
       add('circle', {
-        ...ring,
-        r: (30 + easeOut(k) * 430) * u,
-        stroke: c1,
+        cx,
+        cy,
+        r: (30 + easeOut(k) * 380) * u,
+        fill: 'none',
+        stroke: palette.ember,
         'stroke-width': 3.5 * fade,
         opacity: fade,
       })
       add('circle', {
-        ...ring,
-        r: (20 + easeOut(k) * 250) * u,
-        stroke: c2,
+        cx,
+        cy,
+        r: (20 + easeOut(k) * 220) * u,
+        fill: 'none',
+        stroke: palette.ink,
         'stroke-width': 2.5 * fade,
         opacity: fade * 0.7,
       })
       for (let i = 0; i < SPARKS; i++) {
-        const a = (i / SPARKS) * Math.PI * 2 + 0.3
+        const ang = (i / SPARKS) * Math.PI * 2 + 0.3
         const r0 = (110 + easeOut(k) * 190) * u
         const r1 = r0 + 46 * fade * u
         add('line', {
-          x1: cx + Math.cos(a) * r0,
-          y1: cy + Math.sin(a) * r0,
-          x2: cx + Math.cos(a) * r1,
-          y2: cy + Math.sin(a) * r1,
-          stroke: i % 2 ? c1 : c2,
-          'stroke-width': 3 * u,
+          x1: cx + Math.cos(ang) * r0,
+          y1: cy + Math.sin(ang) * r0,
+          x2: cx + Math.cos(ang) * r1,
+          y2: cy + Math.sin(ang) * r1,
+          stroke: i % 2 ? palette.ember : palette.ink,
+          'stroke-width': 3 * u + 1,
           'stroke-linecap': 'round',
           opacity: fade,
         })
@@ -115,76 +187,39 @@ export function Splash({ onDone }: { onDone: () => void }) {
 
     const render = (t: number) => {
       const p = splashProgress(t)
+      // both trains come in along one diagonal and level out: dark from the top-left, orange from the bottom-right
+      const away = 1 - p.arrive
+      const dx = away * W * 0.8 + p.jolt * 10 * u + p.depart * W * 1.1
+      const dy = away * H * 0.42
+      const tilt = away * 24
+      a.style.transform = `translate(${-dx}px, ${-dy}px) rotate(${tilt}deg)`
+      b.style.transform = `translate(${dx}px, ${dy}px) rotate(${tilt}deg)`
+      rail.style.opacity = String(p.rail)
+      strike(p.strike)
 
-      // the name: hidden halves open by growing in width while their text slides out from behind the capital
-      const wu = wUo * p.uo
-      const wo = wOrge * p.orge
-      uo.style.width = `${wu}px`
-      orge.style.width = `${wo}px`
-      ;(uo.firstElementChild as HTMLElement).style.transform = `translateX(${wu - wUo}px)`
-      ;(orge.firstElementChild as HTMLElement).style.transform = `translateX(${wo - wOrge}px)`
-
-      // centre of the screen -> the header logo
-      const total = wD + wu + wF + wo
-      const cx = W / 2 - total / 2
-      const cy = H / 2 - hM / 2
-      const s = 1 + (target.scale - 1) * p.fly
-      const x = cx + (target.x - cx) * p.fly
-      const y = cy + (target.y - cy) * p.fly
-      mark.style.transform = `translate(${x}px, ${y}px) scale(${s})`
-
-      // D from the top-left, F from the bottom-right
-      const [dx, dy] = entryOffset(p.enter, -W * 0.62, -H * 0.62)
-      const [fxOff, fyOff] = entryOffset(p.enter, W * 0.62, H * 0.62)
-      const tilt = (1 - easeOut(p.enter)) * 14
-      const fTransform = `translate(${fxOff}px, ${fyOff}px) rotate(${tilt}deg) scale(${p.settle})`
-      d.style.transform = `translate(${dx}px, ${dy}px) rotate(${-tilt}deg) scale(${p.settle})`
-      f.style.transform = fTransform
-      d.style.opacity = f.style.opacity = String(Math.min(1, p.enter * 4))
-
-      // ring and sparks: brand colours on the light side, white inside the orange half
-      fx.replaceChildren()
-      fx2.replaceChildren()
-      if (p.strike !== null) {
-        draw(fx, p.strike, EMBER, INK)
-        draw(fx2, p.strike, '#fff', '#fff')
-      }
-
-      // the orange half slides in, then every corner folds into the centre of the F
-      if (p.fold >= 1) orange.style.display = 'none'
-      else {
-        orange.style.display = 'block'
-        const off = (1 - easeOut(p.enter)) * (W + H) * 0.6
-        const fLeft = x + (wD + wu) * s
-        const fcx = fLeft + fxOff + (wF * s) / 2
-        const fcy = y + fyOff + (hM * s) / 2
-        const corners = [
-          [W * 0.62, -10],
-          [W + 10, -10],
-          [W + 10, H + 10],
-          [W * 0.38, H + 10],
-        ].map(([px, py]) => {
-          const ax = px! + off
-          const ay = py! + off
-          return `${ax + (fcx - ax) * p.fold}px ${ay + (fcy - ay) * p.fold}px`
-        })
-        orange.style.clipPath = `polygon(${corners.join(', ')})`
-        f2.style.fontSize = `${size * s}px`
-        f2.style.left = `${fLeft}px`
-        f2.style.top = `${y}px`
-        f2.style.transform = fTransform
-      }
-
-      // underline and tagline sit under the open name and leave before it travels
-      const bottom = y + hM * s
-      under.style.left = `${x}px`
-      under.style.top = `${bottom + 16 * (size / 150)}px`
-      under.style.width = `${total * s}px`
-      under.style.transform = `scaleX(${p.underline})`
-      under.style.opacity = p.underline > 0 ? '1' : '0'
-      tag.style.opacity = String(p.tag)
-      tag.style.top = `${bottom + 46 * (size / 150) + (1 - p.tag) * 10}px`
-
+      // the letters: on the coaches -> the wordmark in the middle -> the header logo
+      const kw = Math.min(1.3 * u, (W * 0.84) / wordW)
+      const wx = (W - wordW * kw) / 2
+      const wy = H / 2 - 50 * kw - coachH * 0.1
+      const target = anchor?.getBoundingClientRect()
+      const kh = target && target.width > 0 ? target.width / wordW : kw * 0.2
+      const hx = target?.left ?? 24
+      const hy = target?.top ?? 24
+      const tint = Math.min(1, Math.max(0, (p.lift - 0.15) / 0.55))
+      free.forEach((s, i) => {
+        const ride = rides[i]!
+        const slot = slots[i]!
+        const x = threeStops(ride.x, wx + slot.x * kw, hx + slot.x * kh, p.lift, p.fly)
+        const y = threeStops(ride.y, wy, hy, p.lift, p.fly)
+        const k = threeStops(ride.k, kw, kh, p.lift, p.fly)
+        s.style.transform = `translate(${x}px, ${y}px) scale(${k})`
+        s.style.color =
+          i < SPLIT
+            ? blend(palette.paper, palette.ink, tint)
+            : blend('#ffffff', palette.ember, tint)
+        s.style.visibility = p.lifted ? 'visible' : 'hidden'
+      })
+      onCoach.forEach((s) => (s.style.visibility = p.lifted ? 'hidden' : 'visible'))
       veil.style.opacity = String(1 - p.reveal)
     }
 
@@ -196,37 +231,33 @@ export function Splash({ onDone }: { onDone: () => void }) {
 
     let raf = 0
     let t0: number | null = null
-    let skipTo: number | null = null
+    let skip = false
     let finished = false
-    const finish = () => {
-      if (finished) return
-      finished = true
-      done.current()
-    }
     const loop = (now: number) => {
       t0 ??= now
-      if (skipTo !== null) {
-        t0 = now - skipTo
-        skipTo = null
+      // a click or key press jumps straight to the hand-off
+      if (skip) {
+        skip = false
+        if (now - t0 < SPLASH.fly) t0 = now - SPLASH.fly
       }
       const t = now - t0
       render(Math.min(t, SPLASH.end))
-      if (t >= SPLASH.end) finish()
-      else raf = requestAnimationFrame(loop)
+      if (t < SPLASH.end) raf = requestAnimationFrame(loop)
+      else if (!finished) {
+        finished = true
+        done.current()
+      }
     }
-    // a click or key press jumps straight to the hand-off
-    const skip = () => {
-      if (t0 !== null && performance.now() - t0 < SPLASH.hold) skipTo = SPLASH.hold
-    }
-    const onResize = () => measure()
+    const onSkip = () => (skip = true)
+    const onResize = () => place()
 
     let cancelled = false
     const start = () => {
       if (cancelled) return
-      measure()
+      place()
       window.addEventListener('resize', onResize)
-      window.addEventListener('pointerdown', skip)
-      window.addEventListener('keydown', skip)
+      window.addEventListener('pointerdown', onSkip)
+      window.addEventListener('keydown', onSkip)
       raf = requestAnimationFrame(loop)
     }
     // wait for the brand font so the letters are measured at their real size (but never wait long)
@@ -239,15 +270,14 @@ export function Splash({ onDone }: { onDone: () => void }) {
       cancelled = true
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
-      window.removeEventListener('pointerdown', skip)
-      window.removeEventListener('keydown', skip)
+      window.removeEventListener('pointerdown', onSkip)
+      window.removeEventListener('keydown', onSkip)
       html.style.overflow = overflow
       if (anchor) anchor.style.visibility = ''
     }
   }, [])
 
-  const letter = 'inline-block will-change-transform'
-  const rest = 'inline-block w-0 overflow-hidden align-baseline'
+  const type = 'leading-none tracking-[-0.04em] whitespace-nowrap'
   return (
     <div
       ref={root}
@@ -257,46 +287,47 @@ export function Splash({ onDone }: { onDone: () => void }) {
       className="font-display fixed inset-0 z-[100] overflow-hidden font-bold"
     >
       <div data-s="veil" className="bg-paper absolute inset-0" />
-      <svg data-s="fx" aria-hidden="true" className="absolute inset-0 size-full" />
-      <div
-        data-s="mark"
-        aria-hidden="true"
-        className="absolute top-0 left-0 flex origin-top-left items-baseline leading-none tracking-[-0.04em] whitespace-nowrap"
-      >
-        <span data-s="d" className={`${letter} text-ink opacity-0`}>
-          {capA}
-        </span>
-        <span data-s="uo" className={`${rest} text-ink`}>
-          <span className="inline-block">{restA}</span>
-        </span>
-        <span data-s="f" className={`${letter} text-ember opacity-0`}>
-          {capB}
-        </span>
-        <span data-s="orge" className={`${rest} text-ember`}>
-          <span className="inline-block">{restB}</span>
-        </span>
+      <div data-s="rail" className="bg-line absolute inset-x-0 h-[3px] opacity-0">
+        <div className="absolute inset-x-0 top-[3px] h-[7px] bg-[repeating-linear-gradient(90deg,var(--color-line)_0_4px,transparent_4px_22px)]" />
       </div>
-      <div
-        data-s="orange"
-        aria-hidden="true"
-        className="bg-ember absolute inset-0 [clip-path:polygon(0_0,0_0,0_0)]"
-      >
-        <svg data-s="fx2" className="absolute inset-0 size-full" />
-        <span data-s="f2" className="absolute leading-none tracking-[-0.04em] text-white">
-          {capB}
-        </span>
+      <div aria-hidden="true">
+        <div
+          data-s="a"
+          className="text-ink absolute flex origin-[100%_60%] items-stretch will-change-transform"
+        >
+          <Nose />
+          {LETTERS.slice(0, SPLIT).map((c, i) => (
+            <Coach key={i} letter={c} light={palette.paper} />
+          ))}
+        </div>
+        <div
+          data-s="b"
+          className="text-ember absolute flex origin-[0%_60%] items-stretch will-change-transform"
+        >
+          {LETTERS.slice(SPLIT).map((c, i) => (
+            <Coach key={i} letter={c} light="#ffffff" />
+          ))}
+          <Nose flip />
+        </div>
+        <svg data-s="fx" className="absolute inset-0 size-full" />
+        {LETTERS.map((c, i) => (
+          <span
+            key={i}
+            data-s="free"
+            className={`invisible absolute top-0 left-0 origin-top-left text-[100px] ${type}`}
+          >
+            {c}
+          </span>
+        ))}
+        <div
+          data-s="measure"
+          className={`invisible absolute top-0 -left-[9999px] text-[100px] ${type}`}
+        >
+          {LETTERS.map((c, i) => (
+            <span key={i}>{c}</span>
+          ))}
+        </div>
       </div>
-      <div data-s="under" aria-hidden="true" className="absolute flex h-[3px] opacity-0 md:h-[5px]">
-        <i className="bg-ink flex-1" />
-        <i className="bg-ember flex-1" />
-      </div>
-      <p
-        data-s="tag"
-        aria-hidden="true"
-        className="text-muted absolute inset-x-0 text-center font-sans text-[11px] font-medium tracking-[0.22em] uppercase opacity-0 md:text-lg"
-      >
-        Web &amp; app studio
-      </p>
     </div>
   )
 }

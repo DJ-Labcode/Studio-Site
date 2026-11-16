@@ -1,1 +1,0 @@
-export { WhatWeDo } from './WhatWeDo'

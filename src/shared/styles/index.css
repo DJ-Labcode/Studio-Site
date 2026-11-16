@@ -15,6 +15,9 @@
   --color-spark: #ffb020;
   --color-web: #1e2bff;
   --color-app: #ff5a1f;
+  /* the departure board */
+  --color-board: #1d1c24;
+  --color-amber: #ffc46b;
   /* fixed brand blue of the laptop screen in the Blender version */
   --color-screen: #1e2bff;
 
