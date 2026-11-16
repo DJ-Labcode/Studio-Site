@@ -1,73 +1,72 @@
-# Studio site
+# DuoForge studio site
 
-Marketing site for a two-developer studio (working name: **DuoForge**): a scroll-driven story that
-moves from a sunny desk into a laptop, splits into a Web world and an App world, and comes back out.
+Three complete versions of the site live side by side, one per folder. Each folder is a full project: you can run it, edit it and deploy it without touching the other two.
 
-**Stack:** React 19 · TypeScript (strict) · Vite · Tailwind CSS v4 · React Router · Three.js (React Three Fiber)
-· Motion · Lenis · EmailJS · Vitest · Playwright.
+| Folder | What it is |
+|---|---|
+| `software_studio/` | The laptop design. A laptop boots, you scroll into its screen, and every section is a software window: a browser of websites, a phone simulator of apps, a planner, a terminal, a README and a message window. |
+| `railway_studio/` | The railway design. Two train lines run down the page, projects are coaches, and contact is a ticket. |
+| `blender_studio/` | The Blender design. A pre-rendered desk scene that glides into a laptop and back out as you scroll. Its Blender pipeline is in `blender_studio/tools/blender`. |
 
-## Commands
+## Run one
+
+Install once, from this folder:
 
 ```bash
 npm install
-npm run dev          # start the dev server
-npm run build        # type-check and build to dist/
-npm test             # unit tests (Vitest)
-npm run lint         # ESLint, including the architecture rules
-npm run format       # Prettier
-npm run e2e          # browser tests (needs: npx playwright install chromium)
 ```
 
-Copy `.env.example` to `.env` and fill in the EmailJS keys to make the contact form send.
+Then start whichever version you want to see:
 
-## Architecture
-
-```
-src/
-  app/        entry point, router, root layout
-  pages/      one file per route; pages compose features
-  features/   one folder per part of the site, each with an index.ts as its public surface
-    hero/       opening statement
-    services/   what we do: web and apps
-    team/       about us
-    projects/   work showcase and project footage
-    contact/    brief form, EmailJS
-    journey/    the Blender version: splash and scroll-scrubbed footage
-    builder/    app estimator (pricing logic, UI to come)
-  three/      WebGL scenes, always imported lazily
-  content/    data only: projects, pricing
-  shared/     brand, ui, hooks, lib, styles (design tokens)
-tools/blender/  how the scroll footage is rendered
-e2e/            Playwright tests
+```bash
+npm run dev:software
 ```
 
-### Rules (enforced by `npm run lint`)
-
-| Layer        | May import                                                               |
-| ------------ | ------------------------------------------------------------------------ |
-| `shared`     | `shared`                                                                 |
-| `content`    | `content`, `shared`                                                      |
-| `three`      | `three`, `content`, `shared`                                             |
-| `features/x` | its own folder, `three`, `content`, `shared`. **Never another feature.** |
-| `pages`      | features and everything below                                            |
-| `app`        | everything                                                               |
-
-- **Logic is separate from UI.** Anything that can be a plain function (pricing, scroll maths) is one, with a test beside it.
-- **Content is data.** Add a project in `src/content/projects.ts`; no component changes needed.
-- **Brand in one place.** Name, founders and tagline live in `src/shared/brand`; colours and fonts in `src/shared/styles/index.css`.
-- **Heavy code is lazy.** Pages are lazy routes; anything using three.js is behind a dynamic import.
-
-## Switching the home page
-
-Two versions of the home page live in the repo. Pick one with a single line in `src/content/site.ts`:
-
-```ts
-homeVariant: 'story' // or 'blender'
+```bash
+npm run dev:railway
 ```
 
-The Blender version is also always reachable at `/journey`.
+```bash
+npm run dev:blender
+```
 
-## Status
+Each opens at the address Vite prints (usually http://localhost:5173).
 
-Both home versions run. To do: add real project screenshots (put images in `public/work/<slug>/`
-and list them in `shots` in `src/content/projects.ts`), and add EmailJS keys so the contact form sends.
+## Edit one
+
+Open that folder and work inside it. Nothing is shared between the folders, so a change in one never affects another. Inside each folder:
+
+- `src/content/` holds the words and the project list. Add a project in `src/content/projects.ts` and it appears everywhere that version lists projects.
+- `src/shared/brand/` holds the company name, the founders and their links.
+- `src/shared/styles/index.css` holds the colours and fonts.
+- `src/features/` holds one folder per part of the page.
+
+## Check everything
+
+These run in all three folders:
+
+```bash
+npm run lint
+```
+
+```bash
+npm run typecheck
+```
+
+```bash
+npm test
+```
+
+```bash
+npm run build
+```
+
+To run a command in one folder only, add `-w <folder>`, for example `npm run build -w software_studio`.
+
+## Settings
+
+Copy `.env.example` to `.env` inside the folder you are running and fill in what you need:
+
+- **EmailJS keys** so the contact form sends email. Without them it opens the visitor's mail app.
+- **`VITE_WHATSAPP_NUMBER`** (software_studio) for the WhatsApp button.
+- **`VITE_PLANNER_URL`** (software_studio) to connect the planner to a live AI model. Without it the planner uses built-in rules and costs nothing.
